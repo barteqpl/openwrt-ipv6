@@ -1,0 +1,48 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2011 barteq.info
+
+START=51
+MODULEPATH="/lib/modules/`uname -r`/ip46nat.ko"
+
+#. /etc/functions.sh
+
+config_cb() {
+        local cfg_type="$1"
+        local cfg_name="$2"
+                
+        case "$cfg_type" in
+        ip46nat)
+             append cfgs_sections "$cfg_name" "$N"
+             ;;
+        esac
+}
+                                                                                        
+
+start() {
+	if [ -e $MODULEPATH ] && [ -z "`lsmod | cut -f 1 -d " "| grep ip46nat`" ]; then
+	#local ip46nat	
+	config_load ip46nat
+	for cfgs_section in $cfgs_sections; do
+		config_get v4addr $cfgs_section v4addr 
+		config_get prefixlan $cfgs_section prefixlan
+		config_get prefixwan $cfgs_section prefixwan
+	done
+		echo 1 > /proc/sys/net/ipv4/conf/all/forwarding
+		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+
+		insmod $MODULEPATH v4addr=$v4addr prefixlan=$prefixlan prefixwan=$prefixwan
+	else
+		echo "Module ip46nat.ko already loaded or not found!"
+		exit 1
+	fi
+}	
+
+stop() {
+	#config_load aiccu
+	#for cfgs_section in $cfgs_sections; do
+	#	aiccu stop /tmp/run/aiccu-$cfgs_section.conf
+	#done
+	if [ ! -z "`lsmod | cut -f 1 -d " "| grep ip46nat`" ]; then
+		/sbin/rmmod ip46nat.ko
+	fi
+}

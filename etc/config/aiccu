@@ -1,0 +1,12 @@
+
+config 'aiccu'
+	option 'defaultroute' '1'
+	option 'nat' '1'
+	option 'heartbeat' '1'
+	option 'password' 'parabole'
+	option 'server' 'tic.sixxs.net'
+	option 'interface' 'sixxs0'
+	option 'requiretls' '0'
+	option 'username' 'BJD2-SIXXS/T46421'
+	option 'tunnel_id' 'T46421'
+

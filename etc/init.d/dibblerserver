@@ -1,0 +1,79 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+# Copyright (C) 2012 barteq.info
+START=53
+STOP=30
+
+config_cb() {
+	local cfg_type="$1"
+	local cfg_name="$2"
+
+	case "$cfg_type" in
+		*)
+			append cfgs_sections "$cfg_name" "$N"
+		;;
+	esac
+}
+
+start() {
+	config_load dibblerserver
+        mkdir -p /tmp/run
+        mkdir -p /var/lib/dibbler/
+        if [ -e /tmp/run/dibbler-server.conf ]; then rm -f /tmp/run/dibbler-server.conf; fi
+        touch /tmp/run/dibbler-server.conf
+	for cfgs_section in $cfgs_sections interface; do
+		config_get log_level $cfgs_section log_level
+		[ -n "$log_level" ] && echo "log-level $log_level" >> /tmp/run/dibbler-server.conf
+		config_get log_mode $cfgs_section log_mode
+		[ -n "$log_mode" ] && echo "log-mode $log_mode" >> /tmp/run/dibbler-server.conf
+		config_get preference $cfgs_section preference
+		[ -n "$preference" ] && echo "preference $preference" >> /tmp/run/dibbler-server.conf
+	
+		config_get interface $cfgs_section interface	
+		if [ -n "$interface" ]; then
+			echo "iface \"$interface\" {" >> /tmp/run/dibbler-server.conf
+			
+			config_get T1 $cfgs_section T1
+			[ -n "$T1" ] && echo -e "\tT1 $T1" >> /tmp/run/dibbler-server.conf
+			config_get T2 $cfgs_section T2
+			[ -n "$T2" ] && echo -e "\tT2 $T2" >> /tmp/run/dibbler-server.conf
+			
+			config_get prefered_lifetime $cfgs_section prefered_lifetime
+			[ -n "$prefered-lifetime" ] && echo -e "\tprefered-lifetime $prefered_lifetime" >> /tmp/run/dibbler-server.conf
+
+			config_get valid_lifetime $cfgs_section valid_lifetime
+			[ -n "$valid_lifetime" ] && echo -e "\tvalid-lifetime $valid_lifetime" >> /tmp/run/dibbler-server.conf
+
+			config_get pool $cfgs_section pool
+
+			echo -e "\tclass {" >> /tmp/run/dibbler-server.conf
+			echo -e "\t\tpool $pool" >> /tmp/run/dibbler-server.conf
+			echo -e "\t}" >> /tmp/run/dibbler-server.conf	
+
+			config_get dns_server $cfgs_section dns_server
+                        echo -e "\toption dns-server $dns_server" >> /tmp/run/dibbler-server.conf
+                        
+			config_get time_zone $cfgs_section time_zone 
+			[ -n "$time_zone" ] && echo -e "\toption time-zone $time_zone" >> /tmp/run/dibbler-server.conf
+						
+			config_get ntp_server $cfgs_section ntp_server
+			[ -n "$ntp_server" ] && echo -e "\toption ntp-server $ntp_server" >> /tmp/run/dibbler-server.conf
+								
+			config_get domain $cfgs_section domain
+			[ -n "$domain" ] && echo -e "\toption domain $domain" >> /tmp/run/dibbler-server.conf
+
+			echo "}" >> /tmp/run/dibbler-server.conf
+		fi
+	done		
+		
+	[ -d /etc/dibbler ] && rm -rf /etc/dibbler
+	mkdir -p /etc/dibbler
+	ln -s /tmp/run/dibbler-server.conf /etc/dibbler/server.conf
+	dibbler-server start >/dev/null 2>&1
+	return 0
+}
+
+stop() {
+	dibbler-server stop >/dev/null 2>&1
+	return 0
+}

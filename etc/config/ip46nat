@@ -1,0 +1,6 @@
+
+config 'ip46nat'
+	option 'v4addr' '10.10.1.0'
+	option 'prefixlan' '1000::'
+	option 'prefixwan' '2001:6a0:200:213::'
+
