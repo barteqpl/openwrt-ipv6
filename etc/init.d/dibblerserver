@@ -61,7 +61,13 @@ start() {
 								
 			config_get domain $cfgs_section domain
 			[ -n "$domain" ] && echo -e "\toption domain $domain" >> /tmp/run/dibbler-server.conf
-
+			
+			config_get sip_server $cfgs_section sip_server
+			[ -n "$sip_server" ] && echo -e "\toption sip-server $sip_server" >> /tmp/run/dibbler-server.conf
+			
+			config_get sip_domain $cfgs_section sip_domain
+			[ -n "$sip_domain" ] && echo -e "\toption sip-domain $sip_domain" >> /tmp/run/dibbler-server.conf
+			
 			echo "}" >> /tmp/run/dibbler-server.conf
 		fi
 	done		

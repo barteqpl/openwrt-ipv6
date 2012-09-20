@@ -36,6 +36,13 @@ t1.default = '600'
 t2 = s:option (Value, "T2", translate("Rebind after"), translate("Time after client should send rebind packet"))
 t2.default = '1200'
 
+sip_server = s:option (Value, "sip_server", translate("SIP server"), nil)
+sip_server.optional = true
+sip_server.datatype = "ip6addr"
+
+sip_domain = s:option (Value, "sip_domain", translate("SIP domain"), nil)
+sip_domain.optional = true
+
 ntp_server = s:option (Value, "ntp_server", translate("NTP server"), nil)
 ntp_server.optional = true
 

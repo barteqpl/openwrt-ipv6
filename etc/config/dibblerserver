@@ -9,6 +9,8 @@ config 'interface'
 	option 'prefered_lifetime' '3600'
 	option 'T1' '1800'
 	option 'T2' '2700'
+	option 'sip_domain' ''
+	option 'sip_server' ''
 
 config 'default'
 	option 'log_level' '8'
