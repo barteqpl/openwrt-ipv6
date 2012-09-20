@@ -68,6 +68,14 @@ start() {
 			config_get sip_domain $cfgs_section sip_domain
 			[ -n "$sip_domain" ] && echo -e "\toption sip-domain $sip_domain" >> /tmp/run/dibbler-server.conf
 			
+			## unfortunatelly no support in 0.7.x version.. Can't compile a new one.
+			#config_get aftr $cfgs_section aftr
+			#[ -n "$aftr" ] && echo -e "\toption ds-lite $aftr" >> /tmp/run/dibbler-server.conf
+			
+			#config_get aftr_fqdn $cfgs_section aftr_fqdn
+			#[ -n "$aftr_fqdn" ] && echo -e "\toption ds-lite $aftr_fqdn" >> /tmp/run/dibbler-server.conf
+			                        
+			
 			echo "}" >> /tmp/run/dibbler-server.conf
 		fi
 	done		
