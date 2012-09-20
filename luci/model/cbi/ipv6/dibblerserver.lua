@@ -30,6 +30,12 @@ dns_server.rmempty = false
 domain = s:option (Value, "domain", translate("Default domain name"), nil)
 domain.optional = true
 
+t1 = s:option (Value, "T1", translate("Renew address after"), translate("Time in seconds, after client should be able to renew address"))
+t1.default = '600'
+
+t2 = s:option (Value, "T2", translate("Rebind after"), translate("Time after client should send rebind packet"))
+t2.default = '1200'
+
 ntp_server = s:option (Value, "ntp_server", translate("NTP server"), nil)
 ntp_server.optional = true
 
