@@ -80,7 +80,7 @@ start() {
 		fi
 	done		
 		
-	[ -d /etc/dibbler ] && rm -rf /etc/dibbler
+	[ -e /etc/dibbler/server.conf ] && rm -f /etc/dibbler/server.conf
 	mkdir -p /etc/dibbler
 	ln -s /tmp/run/dibbler-server.conf /etc/dibbler/server.conf
 	dibbler-server start >/dev/null 2>&1
