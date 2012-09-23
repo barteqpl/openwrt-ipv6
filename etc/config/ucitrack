@@ -60,4 +60,6 @@ config 'ip46nat'
 	
 config 'dibblerserver'
 	option 'init' 'dibblerserver'
-	
+
+config 'dibblerclient'
+	option 'init' 'dibblerclient'

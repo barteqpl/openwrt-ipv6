@@ -75,6 +75,26 @@ valid_lifetime = s:option (Value, "valid_lifetime", translate("Valid lifetime"),
 valid_lifetime.default = '7200'
 valid_lifetime.datatype = "integer"
 
+g = m:section (TypedSection, "default", "General configuration", nil)
+
+log_level = g:option (ListValue, "log_level", "Log level")
+log_level:value("1","1 - Emergency")
+log_level:value("2","2 - Alert")
+log_level:value("3","3 - Critical")
+log_level:value("4","4 - Error (default)")
+log_level:value("5","5 - Warning")
+log_level:value("6","6 - Notice")
+log_level:value("7","7 - Info")
+log_level:value("8","8 - Debug")
+log_level.default=4
+
+log_mode = g:option (ListValue, "log_mode", "Log mode")
+log_mode:value("short", "Short")
+log_mode:value("full", "Full")
+log_mode:value("precise", "Precise") 
+log_mode:value("syslog", "Syslog")
+log_level.default=short
+
 return m
 
  

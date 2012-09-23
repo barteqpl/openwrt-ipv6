@@ -1,0 +1,90 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+# Copyright (C) 2012 barteq.info
+START=52
+STOP=33
+
+config_cb() {
+	local cfg_type="$1"
+	local cfg_name="$2"
+
+	case "$cfg_type" in
+		*)
+			append cfgs_sections "$cfg_name" "$N"
+		;;
+	esac
+}
+
+start() {
+	config_load dibblerclient
+        mkdir -p /tmp/run
+        mkdir -p /var/lib/dibbler/
+        if [ -e /tmp/run/dibbler-client.conf ]; then rm -f /tmp/run/dibbler-client.conf; fi
+        touch /tmp/run/dibbler-client.conf
+        echo "script \"/usr/bin/dibbler.sh\"" >> /tmp/run/dibbler-client.conf
+	for cfgs_section in $cfgs_sections interface; do
+		
+		config_get log_level $cfgs_section log_level
+		[ -n "$log_level" ] && echo "log-level $log_level" >> /tmp/run/dibbler-client.conf
+		config_get log_mode $cfgs_section log_mode
+		[ -n "$log_mode" ] && echo "log-mode $log_mode" >> /tmp/run/dibbler-client.conf
+		
+		config_get downlink_prefix_ifaces $cfgs_section downlink_prefix_ifaces
+		[ -n "$downlink_prefix_ifaces" ] && echo "downlink-prefix-ifaces $downlink_prefix_ifaces" >> /tmp/run/dibbler-client.conf			
+		
+		config_get interface $cfgs_section interface	
+		if [ -n "$interface" ]; then
+			echo "iface \"$interface\" {" >> /tmp/run/dibbler-client.conf
+
+			config_get_bool ia $cfgs_section ia 1
+			[ "$ia" -ne 0 ] && echo -e "\tia" >> /tmp/run/dibbler-client.conf
+			
+			config_get_bool pd $cfgs_section pd 0
+			[ "$pd" -ne 0 ] && echo -e "\tpd" >> /tmp/run/dibbler-client.conf
+			
+			config_get_bool ta $cfgs_section ta 1
+			[ "$ta" -ne 0 ] && echo -e "\tta" >> /tmp/run/dibbler-client.conf
+			
+			config_get T1 $cfgs_section T1
+			[ -n "$T1" ] && echo -e "\tT1 $T1" >> /tmp/run/dibbler-client.conf
+			config_get T2 $cfgs_section T2
+			[ -n "$T2" ] && echo -e "\tT2 $T2" >> /tmp/run/dibbler-client.conf
+			
+
+			config_get valid_lifetime $cfgs_section valid_lifetime
+			[ -n "$valid_lifetime" ] && echo -e "\tvalid-lifetime $valid_lifetime" >> /tmp/run/dibbler-client.conf
+
+			config_get_bool dns_server $cfgs_section dns_server 0
+			[ "$dns_server" -ne 0 ] && echo -e "\toption dns-server" >> /tmp/run/dibbler-client.conf
+                        
+			config_get_bool ntp_server $cfgs_section ntp_server 0
+			[ "$ntp_server" -ne 0 ] && echo -e "\toption ntp-server" >> /tmp/run/dibbler-client.conf
+								
+			config_get_bool domain $cfgs_section domain 0
+			[ "$domain" -ne 0 ] && echo -e "\toption domain" >> /tmp/run/dibbler-client.conf
+			
+			config_get_bool sip_server $cfgs_section sip_server 0
+			[  "$sip_server" -ne 0 ] && echo -e "\toption sip-server" >> /tmp/run/dibbler-client.conf
+			
+			config_get_bool sip_domain $cfgs_section sip_domain 0
+			[ "$sip_domain" -ne 0 ] && echo -e "\toption sip-domain" >> /tmp/run/dibbler-client.conf
+			
+			config_get_bool aftr $cfgs_section aftr 0
+			[ "$aftr" -ne 0 ] && echo -e "\toption aftr" >> /tmp/run/dibbler-client.conf
+			
+			
+			echo "}" >> /tmp/run/dibbler-client.conf
+		fi
+	done		
+		
+	[ -e /etc/dibbler/client.conf ] && rm -f /etc/dibbler/client.conf
+	mkdir -p /etc/dibbler
+	ln -s /tmp/run/dibbler-client.conf /etc/dibbler/client.conf
+	dibbler-client start >/dev/null 2>&1
+	return 0
+}
+
+stop() {
+	dibbler-client stop >/dev/null 2>&1
+	return 0
+}
