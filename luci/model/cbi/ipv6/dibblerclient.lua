@@ -25,6 +25,10 @@ interface = s:taboption ("general", Value, "interface", translate("WAN interface
 interface.default = "eth0.2"
 interface.rmempty = false
 
+downlink_prefix_ifaces = s:taboption ("general", Value, "downlink_prefix_ifaces", translate("LAN interfaces"), translate("Names of the LAN interfaces"))
+downlink_prefix_ifaces.default = "br-lan"
+downlink_prefix_ifaces.optional = true
+
 t1 = s:taboption ("general", Value, "T1", translate("Renew address after"), translate("Time in seconds, after client should be able to renew address"))
 t1.optional = true
 t1.default = "600"
