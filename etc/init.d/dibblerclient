@@ -86,7 +86,7 @@ start() {
 	ln -s /tmp/run/dibbler-client.conf /etc/dibbler/client.conf
 	
 	interface="`uci get dibblerclient.@interface[0].interface`"
-        [ -n "$interface" ] && sysctl -wn net.ipv6.conf.$interface.accept_ra=2 >/dev/null 2>&1
+        [ -n "$interface" ] && sysctl -wn net.ipv6.conf.$interface.accept_ra=1 >/dev/null 2>&1
 	
 	dibbler-client start >/dev/null 2>&1
 	return 0
