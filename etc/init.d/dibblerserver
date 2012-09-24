@@ -39,7 +39,7 @@ start() {
 			[ -n "$T2" ] && echo -e "\tT2 $T2" >> /tmp/run/dibbler-server.conf
 			
 			config_get prefered_lifetime $cfgs_section prefered_lifetime
-			[ -n "$prefered-lifetime" ] && echo -e "\tprefered-lifetime $prefered_lifetime" >> /tmp/run/dibbler-server.conf
+			[ -n "$prefered_lifetime" ] && echo -e "\tprefered-lifetime $prefered_lifetime" >> /tmp/run/dibbler-server.conf
 
 			config_get valid_lifetime $cfgs_section valid_lifetime
 			[ -n "$valid_lifetime" ] && echo -e "\tvalid-lifetime $valid_lifetime" >> /tmp/run/dibbler-server.conf

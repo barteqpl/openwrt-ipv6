@@ -1,21 +1,19 @@
 
 config 'interface'
 	option 'interface' 'eth0.2'
-	option 'downlink_prefix_ifaces'	'br-lan'
+	option 'downlink_prefix_ifaces' 'br-lan'
 	option 'T1' '600'
 	option 'T2' '1200'
 	option 'ta' '0'
 	option 'pd' '1'
 	option 'ia' '1'
 	option 'valid_lifetime' '7200'
-	option 'sip_server' '0'
-	option 'sip_domain' '0'
-	option 'aftr' '0'
+	option 'prefered_lifetime' '3600'
 	option 'dns_server' '1'
 	option 'domain' '1'
-	option 'ntp_server' '0'
-	
+	option 'ntp_server' '1'
+
 config 'default'
-	option 'log_level' '8'
 	option 'log_mode' 'short'
+	option 'log_level' '8'
 

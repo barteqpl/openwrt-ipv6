@@ -1,18 +1,16 @@
 
 config 'interface'
 	option 'valid_lifetime' '7200'
-	option 'dns_server' '2620:0:ccc::2'
+	option 'dns_server' '2001:6a0:18b:deaf::1'
 	option 'interface' 'br-lan'
-	option 'ntp_server' '2001:5c0:1001::194'
-	option 'pool' '2001:6a0:200:8213::/64'
-	option 'time_zone' 'CET'
 	option 'prefered_lifetime' '3600'
-	option 'T1' '1800'
-	option 'T2' '2700'
 	option 'sip_server' '2620:0:ccc::1'
+	option 'T1' '600'
+	option 'T2' '1200'
+	option 'pool' '2001:6a0:18b:170::/64'
 
 config 'default'
-	option 'log_level' '8'
 	option 'log_mode' 'short'
 	option 'preference' '0'
+	option 'log_level' '4'
 

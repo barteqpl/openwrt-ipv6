@@ -21,6 +21,7 @@ start() {
         mkdir -p /var/lib/dibbler/
         if [ -e /tmp/run/dibbler-client.conf ]; then rm -f /tmp/run/dibbler-client.conf; fi
         touch /tmp/run/dibbler-client.conf
+        
         echo "script \"/usr/bin/dibbler.sh\"" >> /tmp/run/dibbler-client.conf
 	for cfgs_section in $cfgs_sections interface; do
 		
@@ -54,6 +55,9 @@ start() {
 			config_get valid_lifetime $cfgs_section valid_lifetime
 			[ -n "$valid_lifetime" ] && echo -e "\tvalid-lifetime $valid_lifetime" >> /tmp/run/dibbler-client.conf
 
+			config_get prefered_lifetime $cfgs_section prefered_lifetime
+			[ -n "$prefered_lifetime" ] && echo -e "\tprefered-lifetime $prefered_lifetime" >> /tmp/run/dibbler-client.conf
+
 			config_get_bool dns_server $cfgs_section dns_server 0
 			[ "$dns_server" -ne 0 ] && echo -e "\toption dns-server" >> /tmp/run/dibbler-client.conf
                         
@@ -80,11 +84,18 @@ start() {
 	[ -e /etc/dibbler/client.conf ] && rm -f /etc/dibbler/client.conf
 	mkdir -p /etc/dibbler
 	ln -s /tmp/run/dibbler-client.conf /etc/dibbler/client.conf
+	
+	interface="`uci get dibblerclient.@interface[0].interface`"
+        [ -n "$interface" ] && sysctl -wn net.ipv6.conf.$interface.accept_ra=2 >/dev/null 2>&1
+	
 	dibbler-client start >/dev/null 2>&1
 	return 0
 }
 
 stop() {
+	interface="`uci get dibblerclient.@interface[0].interface`"
+	[ -n "$interface" ] && sysctl -wn net.ipv6.conf.$interface.accept_ra=0 >/dev/null 2>&1
+	                
 	dibbler-client stop >/dev/null 2>&1
 	return 0
 }
