@@ -13,6 +13,35 @@ $Id: dibblerclient.lua 1 2012-09-23 20:22:36Z bn $
 
 ]]--
 
+local fs = require "nixio.fs"
+require "posix"
+require "luci.fs"
+require "luci.sys"
+require "luci.util"
+
+local pidfile = "/var/lib/dibbler/client.pid"
+
+pid = fs.readfile(pidfile)                
+
+if pid then -- check if process is still running
+	posix.setenv("LUA_PID",pid)
+	local f = io.popen("ps -ef | awk '{ print $1 }' | grep ^$LUA_PID$") 
+	local l = f:read("*a")
+
+	-- stripping newlines (thanks to http://stackoverflow.com/questions/132397/get-back-the-output-of-os-execute-in-lua)
+	l = string.gsub(l, '^%s+', '')
+	l = string.gsub(l, '%s+$', '')
+	l = string.gsub(l, '[\n\r]+', ' ')
+	
+	f:close()
+	if l ~= pid then
+		pid = 0
+	end
+	
+else 
+	pid = 0
+end
+
 m = Map ("dibblerclient", "DHCPv6 client configuration", "Dibbler-client - portable DHCPv6 client implementation")
 s = m:section (TypedSection, "interface", "Interface configuration", nil)
 
@@ -25,33 +54,29 @@ interface = s:taboption ("general", Value, "interface", translate("WAN interface
 interface.default = "eth0.2"
 interface.rmempty = false
 
-downlink_prefix_ifaces = s:taboption ("general", Value, "downlink_prefix_ifaces", translate("LAN interfaces"), translate("Names of the LAN interfaces"))
+downlink_prefix_ifaces = s:taboption ("general", Value, "downlink_prefix_ifaces", translate("LAN interfaces"), translate("Names of the LAN interfaces (minimum one)"))
 downlink_prefix_ifaces.default = "br-lan"
 downlink_prefix_ifaces.optional = true
 
-t1 = s:taboption ("general", Value, "T1", translate("Renew address after"), translate("Time in seconds, after client should be able to renew address"))
+t1 = s:taboption ("general", Value, "T1", translate("Renew address after (seconds)"), translate("Time after client should be able to renew address (hint only)"))
 t1.optional = true
 t1.default = "600"
 t1.datatype = "integer"
 
-t2 = s:taboption ("general", Value, "T2", translate("Rebind after"), translate("Time after client should send rebind packet"))
+t2 = s:taboption ("general", Value, "T2", translate("Rebind after (seconds)"), translate("Time after client should send rebind packet (hint only)"))
 t2.optional = true
 t2.default = "1200"
 t2.datatype = "integer"
 
-prefered_lifetime = s:taboption ("general", Value, "prefered_lifetime", translate("Preferred lifetime"), translate("Preferred lease lifetime in seconds"))
+prefered_lifetime = s:taboption ("general", Value, "prefered_lifetime", translate("Preferred lifetime (seconds)"), translate("Preferred lease time"))
 prefered_lifetime.default = '3600'
 prefered_lifetime.datatype = "integer"
 prefered_lifetime.optional = true
 
-valid_lifetime = s:taboption ("general", Value, "valid_lifetime", translate("Valid lifetime"), nil)
+valid_lifetime = s:taboption ("general", Value, "valid_lifetime", translate("Valid lifetime (seconds)"), nil)
 valid_lifetime.default = '7200'
 valid_lifetime.datatype = "integer"
 valid_lifetime.optional = true
-
-dns_server = s:taboption ("options", Flag, "dns_server", translate("DNS server"), nil)
-dns_server.rmempty = false
-dns_server.default = true
 
 ia = s:taboption ("options", Flag, "ia", translate("IA - regular address (Identity Association for Non-temporary Addresses)"))
 ia.rmempty = false
@@ -65,6 +90,10 @@ ta = s:taboption ("options", Flag, "ta", translate("TA - temporary address (Inde
 ta.rmempty = false
 ta.optional = true
 ta.default = 0 
+
+dns_server = s:taboption ("options", Flag, "dns_server", translate("DNS server"), nil)                                                                         
+dns_server.rmempty = false                                                                                                                                     
+dns_server.default = true         
 
 domain = s:taboption ("options", Flag, "domain", translate("Default domain name"), nil)
 domain.optional = true
@@ -80,7 +109,6 @@ aftr.optional = true
 
 ntp_server = s:taboption ("options", Flag, "ntp_server", translate("NTP server"), nil)
 ntp_server.optional = true
-
 
 g = m:section (TypedSection, "default", "General configuration", nil)
 
@@ -100,8 +128,27 @@ log_mode:value("short", "Short")
 log_mode:value("full", "Full")
 log_mode:value("precise", "Precise") 
 log_mode:value("syslog", "Syslog")
-log_level.default=short
+log_level.default=syslog
+
+if pid ~= 0 then
+	processid = g:option (DummyValue, "processid", translate("Dibbler-client is enabled and running. Process ID"),nil)
+	processid.default = pid
+end
+
+if luci.sys.init.enabled('dibblerclient') then 
+	btn = g:option(Button, "_btn", translate("Disable"), nil)
+	btn.inputstyle = "remove"	
+	function btn.write()
+		luci.sys.init.disable('dibblerclient')
+		luci.sys.process.signal(pid, 15)
+	end
+else
+	btn = g:option(Button, "_btn", translate("Enable"), nil)
+	btn.inputstyle = "apply"
+	function btn.write()
+		luci.sys.init.enable('dibblerclient')
+		luci.sys.exec('/etc/init.d/dibblerclient start')
+	end
+end
 
 return m
-
- 
