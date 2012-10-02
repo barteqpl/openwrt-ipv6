@@ -141,6 +141,7 @@ if luci.sys.init.enabled('dibblerclient') then
 	function btn.write()
 		luci.sys.init.disable('dibblerclient')
 		luci.sys.process.signal(pid, 15)
+		luci.http.header("refresh","3")
 	end
 else
 	btn = g:option(Button, "_btn", translate("Enable"), nil)
@@ -148,6 +149,7 @@ else
 	function btn.write()
 		luci.sys.init.enable('dibblerclient')
 		luci.sys.call('/etc/init.d/dibblerclient start')
+		luci.http.header("refresh","3")
 	end
 end
 

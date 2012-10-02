@@ -136,6 +136,7 @@ if luci.sys.init.enabled('dibblerserver') then
 	function btn.write()
 		luci.sys.init.disable('dibblerserver')
 		luci.sys.process.signal(pid, 15)
+		luci.http.header("refresh","3")
 	end
 
 else
@@ -146,6 +147,7 @@ else
 	function btn.write()
 		luci.sys.init.enable('dibblerserver')
 		luci.sys.call('/etc/init.d/dibblerserver start')
+		luci.http.header("refresh","3")
 	end
 	
 end
