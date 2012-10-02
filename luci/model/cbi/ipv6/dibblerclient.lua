@@ -147,7 +147,7 @@ else
 	btn.inputstyle = "apply"
 	function btn.write()
 		luci.sys.init.enable('dibblerclient')
-		luci.sys.exec('/etc/init.d/dibblerclient start')
+		luci.sys.call('/etc/init.d/dibblerclient start')
 	end
 end
 

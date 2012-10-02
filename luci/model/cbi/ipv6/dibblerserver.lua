@@ -13,6 +13,34 @@ $Id: dibblerserver.lua 1 2012-09-13 20:22:36Z bn $
 
 ]]--
 
+local fs = require "nixio.fs"
+require "posix"
+require "luci.fs"
+require "luci.sys"
+require "luci.util"
+
+local pidfile = "/var/lib/dibbler/server.pid"
+
+pid = fs.readfile(pidfile)
+
+if pid then -- check if process is still running
+	posix.setenv("LUA_PID",pid)
+	local f = io.popen("ps -ef | awk '{ print $1 }' | grep ^$LUA_PID$")
+	local l = f:read("*a")
+
+	l = string.gsub(l, '^%s+', '')
+	l = string.gsub(l, '%s+$', '')
+	l = string.gsub(l, '[\n\r]+', ' ')
+	
+	f:close()
+	if l ~= pid then
+		pid = 0
+	end
+                                                                                              
+	else
+		pid = 0
+end
+	
 m = Map ("dibblerserver", "DHCPv6 server configuration", "Dibbler-server - portable DHCPv6 implementation")
 s = m:section (TypedSection, "interface", "Interface configuration", nil)
 
@@ -95,6 +123,30 @@ log_mode:value("precise", "Precise")
 log_mode:value("syslog", "Syslog")
 log_level.default=short
 
-return m
+if pid ~= 0 then
+	processid = g:option (DummyValue, "processid", translate("Dibbler-server is enabled and running. Process ID"),nil)
+	processid.default = pid
+end
+                
+if luci.sys.init.enabled('dibblerserver') then
+	
+	btn = g:option(Button, "_btn", translate("Disable"), nil)
+	btn.inputstyle = "remove"
+	
+	function btn.write()
+		luci.sys.init.disable('dibblerserver')
+		luci.sys.process.signal(pid, 15)
+	end
 
- 
+else
+
+	btn = g:option(Button, "_btn", translate("Enable"), nil)
+	btn.inputstyle = "apply"
+	
+	function btn.write()
+		luci.sys.init.enable('dibblerserver')
+		luci.sys.call('/etc/init.d/dibblerserver start')
+	end
+	
+end
+return m
