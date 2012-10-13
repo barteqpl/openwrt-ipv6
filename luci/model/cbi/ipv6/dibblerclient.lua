@@ -131,7 +131,7 @@ log_mode:value("syslog", "Syslog")
 log_level.default=syslog
 
 if pid ~= 0 then
-	processid = g:option (DummyValue, "processid", translate("Dibbler-client is enabled and running. Process ID"),nil)
+	processid = g:option (DummyValue, "processid", translate("Dibbler-client process ID"),nil)
 	processid.default = pid
 end
 
@@ -140,8 +140,9 @@ if luci.sys.init.enabled('dibblerclient') then
 	btn.inputstyle = "remove"	
 	function btn.write()
 		luci.sys.init.disable('dibblerclient')
-		luci.sys.process.signal(pid, 15)
-		luci.http.header("refresh","3")
+		-- luci.sys.process.signal(pid, 15)
+		luci.sys.call('/etc/init.d/dibblerclient stop')
+		luci.http.header("refresh","1")
 	end
 else
 	btn = g:option(Button, "_btn", translate("Enable"), nil)
@@ -149,7 +150,7 @@ else
 	function btn.write()
 		luci.sys.init.enable('dibblerclient')
 		luci.sys.call('/etc/init.d/dibblerclient start')
-		luci.http.header("refresh","3")
+		luci.http.header("refresh","1")
 	end
 end
 

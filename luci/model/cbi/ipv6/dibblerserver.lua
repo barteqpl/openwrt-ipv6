@@ -121,10 +121,10 @@ log_mode:value("short", "Short")
 log_mode:value("full", "Full")
 log_mode:value("precise", "Precise") 
 log_mode:value("syslog", "Syslog")
-log_level.default=short
+log_level.default=syslog
 
 if pid ~= 0 then
-	processid = g:option (DummyValue, "processid", translate("Dibbler-server is enabled and running. Process ID"),nil)
+	processid = g:option (DummyValue, "processid", translate("Dibbler-server process ID"),nil)
 	processid.default = pid
 end
                 
@@ -135,8 +135,9 @@ if luci.sys.init.enabled('dibblerserver') then
 	
 	function btn.write()
 		luci.sys.init.disable('dibblerserver')
-		luci.sys.process.signal(pid, 15)
-		luci.http.header("refresh","3")
+		--luci.sys.process.signal(pid, 15)
+		luci.sys.call('/etc/init.d/dibblerserver stop')
+		luci.http.header("refresh","1")
 	end
 
 else
@@ -147,7 +148,7 @@ else
 	function btn.write()
 		luci.sys.init.enable('dibblerserver')
 		luci.sys.call('/etc/init.d/dibblerserver start')
-		luci.http.header("refresh","3")
+		luci.http.header("refresh","1")
 	end
 	
 end
