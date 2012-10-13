@@ -1,10 +1,9 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2011 barteq.info
+# Copyright (C) 2012 barteq.info
 
 START=51
 MODULEPATH="/lib/modules/`uname -r`/ip46nat.ko"
 
-#. /etc/functions.sh
 
 config_cb() {
         local cfg_type="$1"
@@ -26,11 +25,33 @@ start() {
 		config_get v4addr $cfgs_section v4addr 
 		config_get prefixlan $cfgs_section prefixlan
 		config_get prefixwan $cfgs_section prefixwan
+		config_get v4offset $cfgs_section v4offset
+		config_get v4masklen $cfgs_section v4masklen
+		config_get v6prefixlen $cfgs_section v6prefixlen
+		config_get debug $cfgs_section debug
 	done
+		
+		[ -n "$v4masklen" ] && v4masklen=24
+		
 		echo 1 > /proc/sys/net/ipv4/conf/all/forwarding
 		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+		
+		# the only way to make module works is to diable firewall
+		# and change policy to accept forwarded traffic. Use with caution!
+		
+		iptables -F
+		ip6tables -F
+		iptables -P FORWARD ACCEPT
+		ip6tables -P FORWARD ACCEPT
+		iptables -I OUTPUT -d $v4addr/$v4masklen -p ICMP --icmp-type network-unreachable -j DROP
+		ip6tables -I OUTPUT -s $prefixwan -p icmpv6 --icmpv6-type destination-unreachable -j DROP
 
-		insmod $MODULEPATH v4addr=$v4addr prefixlan=$prefixlan prefixwan=$prefixwan
+		insmod $MODULEPATH v4addr=$v4addr prefixlan=$prefixlan prefixwan=$prefixwan \
+		$([ -n "$v4offset" ] && echo -n "v4offset=$v4offset") \
+		$([ -n "$v4masklen" ] && echo -n "v4masklen=$v4masklen") \
+		$([ -n "$v6prefixlen" ] && echo -n "v6prefixlen=$v6prefixlen") \
+		$([ -n "$debug" ] && echo -n "debug=$debug") 
+
 	else
 		echo "Module ip46nat.ko already loaded or not found!"
 		exit 1
@@ -38,10 +59,6 @@ start() {
 }	
 
 stop() {
-	#config_load aiccu
-	#for cfgs_section in $cfgs_sections; do
-	#	aiccu stop /tmp/run/aiccu-$cfgs_section.conf
-	#done
 	if [ ! -z "`lsmod | cut -f 1 -d " "| grep ip46nat`" ]; then
 		/sbin/rmmod ip46nat.ko
 	fi
