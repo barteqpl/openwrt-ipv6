@@ -13,7 +13,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 local fs = require "nixio.fs"
 
-m = Map ("ip46nat", "IP46NAT module", "Experimental ip46nat module")
+m = Map ("ip46nat", "IP46NAT module", "Experimental ip46nat module. <br/>DISCLAIMER: Be aware that after loading this \
+module <strong>firewall is automatically disabled</strong>, both for IPv4 and IPv6!")
 s = m:section (TypedSection, "ip46nat","IP46NAT module configuration", nil)
 
 v4addr = s:option(Value, "v4addr", translate("IPv4 network address"), translate("Defines IPv4 subnet that will be translated to IPv6 traffic")) 
@@ -56,11 +57,19 @@ local param_values = fs.readfile("/proc/ip46nat/params")
 state = s:option (DummyValue, "_state", translate("Module state"), nil)
 if param_values then
 	state.value = "Enabled"
+
 	params = s:option (TextValue, "_params", translate("Module parameters"), nil)
 	params.wrap = true
 	params.rows = 10
 	function params.cfgvalue(self, section)
 		return param_values
+	end
+	
+	stats = s:option (TextValue, "_stats", translate("Module statistics"), nil)
+	stats.wrap = true
+	stats.rows = 10
+	function stats.cfgvalue(self, section)
+		return fs.readfile("/proc/ip46nat/stats")
 	end
 	        
 else 
