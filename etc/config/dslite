@@ -1,0 +1,5 @@
+
+config 'dslite'
+	option 'automatic' '1'
+	option 'aftr' '2001:6a0:18b:ffff::1'
+

@@ -1,0 +1,41 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2012 barteq.info
+
+START=58
+
+config_cb() {
+        local cfg_type="$1"
+        local cfg_name="$2"
+                
+        case "$cfg_type" in
+        dslite)
+             append cfgs_sections "$cfg_name" "$N"
+             ;;
+        esac
+}
+                                                                                        
+
+start() {
+	config_load dslite
+	for cfgs_section in $cfgs_sections; do
+		config_get aftr $cfgs_section aftr
+	done
+	
+	wanaddr="$(ip -6 addr show dev `uci -P/var/state get network.wan.ifname` | grep 'scope global' | awk '{ print $2 }')"
+
+	echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+	echo 1 > /proc/sys/net/ipv4/conf/all/forwarding
+	iptables -F
+	ip6tables -F
+	iptables -P FORWARD ACCEPT
+	ip6tables -P FORWARD ACCEPT
+
+	ip -6 tunnel add dslite0 mode ipip6 local $wanaddr remote $aftr dev eth0.2
+	ip addr add 192.0.0.2 peer 192.0.0.1 dev dslite0
+	ip link set dslite0 up
+	ip route add default dev dslite0
+}
+
+stop () {
+	ip tunnel del dslite0
+}
