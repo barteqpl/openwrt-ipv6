@@ -20,7 +20,7 @@ if [  $(/etc/init.d/dibblerserver enabled && echo 1) ]; then
 				if [ -n "$SRV_OPTION64" ] && [ `uci get dslite.@dslite[0].automatic` -eq 1 ]; then
 					aftr_ip="`ping -6 -c 1 -w 1 -W 1 -q $SRV_OPTION64| head -n1 | sed -e 's/.*\ (\(.*\))\:.*/\1/'`"
 					
-					logger -t dibblerclient "Recieved AFTR - $SRV_OPTION64 ($aftr_ip)"
+					logger -t dibblerclient "Received AFTR - $SRV_OPTION64 ($aftr_ip)"
 					if [ "`uci get dslite.@dslite[0].aftr`" != $aftr_ip ]; then
 						uci set dslite.@dslite[0].aftr=$aftr_ip
 						uci commit
