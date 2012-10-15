@@ -35,7 +35,7 @@ if [  $(/etc/init.d/dibblerserver enabled && echo 1) ]; then
 				logger -t dibblerclient "dibbler-server restarted"
 
 				if [ ! -e /var/run/radvd.pid ]; then
-					logger -t dibblerclient "radvd not running. Stared."
+					logger -t dibblerclient "radvd not running. Starting..."
 					/etc/init.d/radvd start
 				fi
 			fi
