@@ -20,8 +20,7 @@ function index()
 	entry({"admin", "network", "ipv6"}, alias("admin", "network", "ipv6", "aiccu"), "IPv6  Connectivity", 80).index = true
 	entry({"admin", "network", "ipv6", "aiccu"}, cbi("ipv6/aiccu"), "AICCU", 20).leaf = true
 	entry({"admin", "network", "ipv6", "ip46nat"}, cbi("ipv6/ip46nat"), "IP46NAT", 30).leaf = true
---	entry({"admin", "network", "ipv6", "teredo"}, cbi("ipv6/teredo"), "Teredo", 40).leaf = true
---	entry({"admin", "network", "ipv6", "dslite"}, cbi("ipv6/dslite"), "DS-Lite", 50).leaf = true
+	entry({"admin", "network", "ipv6", "dslite"}, cbi("ipv6/dslite"), "DS-Lite", 50).leaf = true
 	--entry({"admin", "network", "ipv6", "static"}, cbi("ipv6/static"), "Static IPv6 Tunnel", 60).leaf = true
 	entry({"admin", "network", "ipv6", "dibblerclient"}, cbi("ipv6/dibblerclient"), "DHCPv6 client", 70).leaf = true
 	entry({"admin", "network", "ipv6", "dibblerserver"}, cbi("ipv6/dibblerserver"), "DHCPv6 server", 80).leaf = true

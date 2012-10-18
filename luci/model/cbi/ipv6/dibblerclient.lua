@@ -13,6 +13,7 @@ $Id: dibblerclient.lua 1 2012-09-23 20:22:36Z bn $
 
 ]]--
 
+local uci = luci.model.uci.cursor()
 local fs = require "nixio.fs"
 require "posix"
 require "luci.fs"
@@ -50,13 +51,24 @@ s:tab("options", translate("Requested options"))
 
 
 
-interface = s:taboption ("general", Value, "interface", translate("WAN interface name"), translate("Name of the WAN interface"))
-interface.default = "eth0.2"
+interface = s:taboption ("general", Value, "interface", translate("WAN interface"), translate("Name of the WAN interface"))
+interface.default = uci:get("network", "wan", "ifname")
 interface.rmempty = false
+for i,d in ipairs(luci.sys.net.devices()) do
+	if d ~= "lo" then
+		interface:value(d)
+	end
+end
 
 downlink_prefix_ifaces = s:taboption ("general", Value, "downlink_prefix_ifaces", translate("LAN interfaces"), translate("Names of the LAN interfaces (minimum one)"))
 downlink_prefix_ifaces.default = "br-lan"
 downlink_prefix_ifaces.optional = true
+for i,d in ipairs(luci.sys.net.devices()) do
+	if d ~= "lo" then
+		downlink_prefix_ifaces:value(d)
+	end
+end
+                                
 
 t1 = s:taboption ("general", Value, "T1", translate("Renew address after (seconds)"), translate("Time after client should be able to renew address (hint only)"))
 t1.optional = true

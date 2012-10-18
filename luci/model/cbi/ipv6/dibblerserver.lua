@@ -44,9 +44,14 @@ end
 m = Map ("dibblerserver", "DHCPv6 server configuration", "Dibbler-server - portable DHCPv6 implementation")
 s = m:section (TypedSection, "interface", "Interface configuration", nil)
 
-interface = s:option (Value, "interface", translate("LAN interface name"), translate("Name of the LAN interface"))
+interface = s:option (Value, "interface", translate("LAN interface"), translate("Name of the LAN interface"))
 interface.default = "br-lan"
 interface.rmempty = false
+for i,d in ipairs(luci.sys.net.devices()) do
+	if d ~= "lo" then
+		interface:value(d)
+	end
+end
 
 pool = s:option (Value, "pool", translate("DHCPv6 pool"), translate("IPv6 address pool"))
 pool.datatype     = "ip6addr"

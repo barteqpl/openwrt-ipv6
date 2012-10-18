@@ -10,21 +10,25 @@ if [  $(/etc/init.d/dibblerserver enabled && echo 1) ]; then
 	if [ -n "`uci get dibblerserver.@interface[0].pool|sed -e 's/\///'`" ]; then
 
 		if [ "$1" = add ] || [ "$1" = update ]; then
-				
+			
 			if [ -n "$PREFIX1" ] && [ -n "$PREFIX1LEN" ]; then
+				
+				currentip="$(ip -6 addr show dev $IFACE|grep $PREFIX1/$PREFIX1LEN | awk '{ print $2 }')"
+				[ -n "$currentip" ] && exit 0
+				
 				[ "$1" = add ] && logger -t dibblerclient "new prefix added - $PREFIX1/$PREFIX1LEN to interface $IFACE"
 			
 				ip -6 addr add $PREFIX1/$PREFIX1LEN dev $IFACE
 			
-				# automatically set aftr IP if allowed and both server and client supports this option 	
-				if [ -n "$SRV_OPTION64" ] && [ `uci get dslite.@dslite[0].automatic` -eq 1 ]; then
+				# automatically sets aftr IP if allowed, enabled and both server and client supports this option 	
+				if [ -n "$SRV_OPTION64" ] && [ `uci get dslite.@dslite[0].automatic` -eq 1 ] && [ $(/etc/init.d/dslite enabled && echo 1) ]; then
 					aftr_ip="`ping -6 -c 1 -w 1 -W 1 -q $SRV_OPTION64| head -n1 | sed -e 's/.*\ (\(.*\))\:.*/\1/'`"
 					
 					logger -t dibblerclient "Received AFTR - $SRV_OPTION64 ($aftr_ip)"
 					if [ "`uci get dslite.@dslite[0].aftr`" != $aftr_ip ]; then
 						uci set dslite.@dslite[0].aftr=$aftr_ip
 						uci commit
-						logger -t dibblerclient "Dslite restart"
+						logger -t dibblerclient "Dslite module restarted"
 						/etc/init.d/dslite restart
 					fi
 				fi
