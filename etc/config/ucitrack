@@ -63,3 +63,6 @@ config 'dibblerserver'
 
 config 'dibblerclient'
 	option 'init' 'dibblerclient'
+	
+config 'dslite'
+	option 'init' 'dslite'
