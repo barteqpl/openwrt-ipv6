@@ -1,0 +1,14 @@
+config 'aiccu'
+	option 'init' 'aiccu'
+	
+config 'ip46nat'
+	option 'init' 'ip46nat'
+	
+config 'dibblerserver'
+	option 'init' 'dibblerserver'
+
+config 'dibblerclient'
+	option 'init' 'dibblerclient'
+	
+config 'dslite'
+	option 'init' 'dslite'
