@@ -1,0 +1,137 @@
+CONTENTS OF THIS FILE --------------------- 
+
+* Prerequisites 
+* Installation 
+
+PREREQUISITES ------------ 
+
+In order to proceed, you need a router 
+running OpenWRT 10.3 (Bacfire), 100 KB free space for scripts and in 
+case you’ve not included it in build - some more kilobytes free for 
+packages installation. Please notice that this project provides only 
+UCI/LuCI part and appropriate modules must be installed manually or 
+included into main image build. 
+
+Required packages include (tested version in brackets): 
+
+	- dibbler-client (0.8.2-1) 
+	- dibbler-server (0.8.2-1) 
+	- radvd (1.8-3) 
+	- aiccu (20070115-5) 
+	- kmod-ipv6 (2.6.32.27-1) 
+	- ip (2.6.29-1-2) 
+	- kmod-iptunnel6 (2.6.32.27-1) 
+	- iptables (1.4.6-3.1) 
+	- kmod-ip46nat (HEAD revision from endian branch - 
+				https://github.com/tomaszmrugalski/ip46nat/tree/endian) 
+
+Of course there are more packages that are mandatory, but all of them 
+should be included in base build. Please check if you have these in 
+yours: luci, uci, uhttpd, luci-lib-nixio, luci-lib-sys, 
+luci-mod-admin-full, luci-app-radvd. 
+
+kmod-ip46nat is a special case. Module have to be separately build and 
+after compilation should be located in /lib/modules/`uname -r`/. Build 
+instructions are available on project website. Author, however created a 
+patch that should create also ip46nat.ko module. Patch name is 
+ip46nat_kernel.patch and should be copied to 
+target/linux/generic-2.6/patches-2.6.32 directory in main OpenWRT build 
+tree. 
+
+Other things that are needed are SCP/SFTP client, active SSH on your 
+router (dropbear is enough, but full OpenSSH is suggested) and about 100 
+KB free space on overlay filesystem (after installation of all 
+packgages). 
+
+INSTALLATION ------------ 
+
+Installation requires a bit effort, as no predefined OpenWRT makefile 
+files are provided. 
+
+Connect to your router using SFTP client. In case using WinSCP and 
+dropbear, choose protocol SCP. Dropbear does not include SFTP daemon by 
+default. Same applies to Linux. The only way to copy files to router is 
+scp command. Problem does not exist when using sshd from OpenSSH 
+project. 
+
+After connection is established, copy all files into appropriate places. 
+Project main tree reflects partially OpenWRT file schema, so contents of 
+every directory should be copied into analogue folder on the router. 1:1 
+rule applies to all files in /etc/ and /usr. This changes for the /luci 
+folder - it’s location on target machine is different - 
+/usr/lib/lua/luci. Full project tree looks like this: 
+
+.
+├── etc
+│   ├── config
+│   │   ├── aiccu
+│   │   ├── dibblerclient
+│   │   ├── dibblerserver
+│   │   ├── dslite
+│   │   ├── ip46nat
+│   │   └── ucitrack.diff ***
+│   ├── hotplug.d
+│   │   └── iface
+│   │       └── 35-dibbler
+│   └── init.d
+│       ├── aiccu
+│       ├── dibblerclient
+│       ├── dibblerserver
+│       ├── dslite
+│       └── ip46nat
+├── luci
+│   ├── controller
+│   │   └── ipv6
+│   │       └── main.lua
+│   └── model
+│       └── cbi
+│           └── ipv6
+│               ├── aiccu.lua
+│               ├── dibblerclient.lua
+│               ├── dibblerserver.lua
+│               ├── dslite.lua
+│               └── ip46nat.lua
+└── usr
+    └── bin
+        └── dibbler.sh
+
+
+Easiest way is to put all files into proper place with scp command. SSH 
+keys usage is recommended. Keys can be pasted using LuCI interface. Page 
+that allows it is under System → Administration tab. 
+
+Example session (copy and paste should work): 
+
+scp etc/config/* root@192.168.1.1:/etc/config/
+scp etc/hotplug.d/iface/* root@192.168.1.1:/etc/hotplug.d/iface/
+scp etc/init.d/* root@192.168.1.1:/etc/init.d/
+scp usr/bin/* root@192.168.1.1:/usr/bin/
+
+Afterwards you have to create some folders needed for LuCI modules. 
+
+ssh root@192.168.1.1 mkdir /usr/lib/lua/luci/controller/ipv6
+ssh root@192.168.1.1 mkdir /usr/lib/lua/luci/model/cbi/ipv6
+
+Having folders created we can follow with uploading LuCI files: 
+
+scp luci/controller/ipv6/* root@192.168.1.1:/usr/lib/lua/luci/controller/ipv6/
+scp luci/model/cbi/ipv6/* root@192.168.1.1:/usr/lib/lua/luci/model/cbi/ipv6/
+
+After all files are copied, you have to add contents of 
+/etc/config/ucitrack.diff file to original ucitrack. It’s needed to 
+map LuCI scripts with proper init files. It can be done by issuing 
+command “cat ucitrack.diff >> ucitrack”. 
+
+Second step includes removing original /etc/init.d/dibbler-client and 
+dibbler-server init files. They are replaced by dibblerclient and 
+dibblerserver UCI capable alterntives. 
+
+Last step is to check files permissions. All /etc/init.d/, 
+/etc/hotplug.d/iface and /usr/bin files needs an execute bit. This can 
+be granted by issuing command “chmod +x /etc/init.d/* 
+/etc/hotplug.d/iface/* /usr/bin/*”. 
+
+After all these steps, we are done. You can freely login into LuCI 
+interface and search for ‘IPv6 Connectivity’ under the ‘Network’ 
+tab. 
+

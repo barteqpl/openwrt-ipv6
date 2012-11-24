@@ -43,8 +43,9 @@ start() {
 		ip6tables -F
 		iptables -P FORWARD ACCEPT
 		ip6tables -P FORWARD ACCEPT
-		iptables -I OUTPUT -d $v4addr/$v4masklen -p ICMP --icmp-type network-unreachable -j DROP
-		ip6tables -I OUTPUT -s $prefixwan -p icmpv6 --icmpv6-type destination-unreachable -j DROP
+		iptables -I OUTPUT -d $v4addr/$v4masklen -p ICMP --icmp-type network-unreachable -j DROP 
+		iptables -I FORWARD -d $v4addr/$v4masklen -p ICMP --icmp-type network-unreachable -j DROP
+		#ip6tables -I OUTPUT -s $prefixwan/$v6prefixlen -p icmpv6 --icmpv6-type destination-unreachable -j DROP
 
 		insmod $MODULEPATH v4addr=$v4addr prefixlan=$prefixlan prefixwan=$prefixwan \
 		$([ -n "$v4offset" ] && echo -n "v4offset=$v4offset") \
