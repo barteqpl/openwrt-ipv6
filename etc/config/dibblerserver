@@ -10,7 +10,7 @@ config 'interface'
 	option 'pool' '2001:6a0:18b:170::/64'
 
 config 'default'
-	option 'log_mode' 'short'
+	option 'log_mode' 'syslog'
 	option 'preference' '0'
 	option 'log_level' '4'
 
