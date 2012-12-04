@@ -1,0 +1,19 @@
+--- package/kernel/modules/netsupport.mk	2012-12-04 21:58:53.000000000 +0100
++++ package/kernel/modules/netsupport.mk	2012-09-22 16:54:08.000000000 +0200
+@@ -722,3 +722,16 @@
+ 
+ $(eval $(call KernelPackage,pktgen))
+ 
++define KernelPackage/ip46nat
++  SUBMENU:=$(NETWORK_SUPPORT_MENU)
++  TITLE:=IPv4-IPv6 translator
++  DEPENDS:= @LINUX_2_6
++  KCONFIG:= CONFIG_IP46_NAT
++  FILES:= $(LINUX_DIR)/net/ipv6/ip46nat.$(LINUX_KMOD_SUFFIX)
++endef
++
++define KernelPackage/ip46nat/description
++ Kernel modules for IPv4-IPv6 NAT
++endef
++
++$(eval $(call KernelPackage,ip46nat))
